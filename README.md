@@ -217,14 +217,14 @@ This project uses:
 <details>
 <summary>Logger preview (pretty)</summary>
 
-![Logger preview](demo/image.png)
+![Logger preview](https://git.creations.works/atums/echo/media/branch/main/demo/image.png)
 
 </details>
 
 <details>
 <summary>Logger preview (no pretty)</summary>
 
-![Logger preview no-pretty](demo/image-no-pretty.png)
+![Logger preview no-pretty](https://git.creations.works/atums/echo/media/branch/main/demo/image-no-pretty.png)
 
 </details>
 
