@@ -1,8 +1,8 @@
 import { basename } from "node:path";
-import { format } from "node:util";
+import { format, inspect } from "node:util";
 import { format as formatDate } from "date-fns-tz";
 
-import { ansiColors, logLevelValues } from "@lib/config";
+import { ansiColors, defaultLevelColor, logLevelValues } from "@lib/config";
 import type {
 	LogLevel,
 	LogLevelValue,
@@ -10,28 +10,43 @@ import type {
 	PatternContext,
 } from "@types";
 
-function getTimestamp(config: Required<LoggerConfig>): string {
+function getTimestamp(config: Required<LoggerConfig>): {
+	prettyTimestamp: string;
+	timestamp: string;
+} {
 	const now = new Date();
 
 	if (config.timezone === "local") {
-		return formatDate(now, config.dateFormat);
+		return {
+			prettyTimestamp: formatDate(now, config.dateFormat),
+			timestamp: now.toISOString(),
+		};
 	}
 
-	return formatDate(now, config.dateFormat, {
-		timeZone: config.timezone,
-	});
+	return {
+		prettyTimestamp: formatDate(now, config.dateFormat, {
+			timeZone: config.timezone,
+		}),
+		timestamp: now.toISOString(),
+	};
 }
 
 function getCallerInfo(config: Required<LoggerConfig>): {
+	id: string;
 	fileName: string;
 	line: string;
 	column: string;
 	timestamp: string;
+	prettyTimestamp: string;
 } {
+	const id = generateShortId();
+
 	const fallback = {
+		id: id,
 		fileName: "unknown",
 		line: "0",
-		timestamp: getTimestamp(config),
+		timestamp: getTimestamp(config).timestamp,
+		prettyTimestamp: getTimestamp(config).prettyTimestamp,
 		column: "0",
 	};
 
@@ -54,10 +69,12 @@ function getCallerInfo(config: Required<LoggerConfig>): {
 			const columnNumber = fileURLMatch[3];
 
 			return {
+				id: id,
 				fileName: basename(fullPath),
 				line: lineNumber,
 				column: columnNumber,
-				timestamp: getTimestamp(config),
+				timestamp: getTimestamp(config).timestamp,
+				prettyTimestamp: getTimestamp(config).prettyTimestamp,
 			};
 		}
 
@@ -76,10 +93,12 @@ function getCallerInfo(config: Required<LoggerConfig>): {
 			}
 
 			return {
+				id: id,
 				fileName: basename(fullPath),
 				line: lineNumber,
 				column: columnNumber,
-				timestamp: getTimestamp(config),
+				timestamp: getTimestamp(config).timestamp,
+				prettyTimestamp: getTimestamp(config).prettyTimestamp,
 			};
 		}
 	}
@@ -107,33 +126,45 @@ function replaceColorTokens(
 ): string {
 	return input
 		.replace(/{color:(\w+)}/g, (_, colorKey) => {
+			if (!config.consoleColor) return "";
 			if (colorKey === "levelColor") {
-				const colorForLevel = config.levelColor?.[level];
+				const colorForLevel =
+					config.levelColor?.[level] ?? defaultLevelColor[level];
 				return ansiColors[colorForLevel ?? ""] ?? "";
 			}
 			return ansiColors[colorKey] ?? "";
 		})
-		.replace(/{reset}/g, ansiColors.reset);
+		.replace(/{reset}/g, config.consoleColor ? ansiColors.reset : "");
 }
 
 function parsePattern(ctx: PatternContext): string {
 	const { level, data, config } = ctx;
 
-	const { fileName, line, column, timestamp } = getCallerInfo(config);
-	const resolvedData: string = format(data);
+	const { id, fileName, line, column, timestamp, prettyTimestamp } =
+		getCallerInfo(config);
+	const resolvedData: string =
+		config.prettyPrint && typeof data === "object" && data !== null
+			? inspect(data, {
+					depth: null,
+					colors: false,
+					breakLength: 1,
+					compact: false,
+				})
+			: format(data);
+
 	const numericLevel: LogLevelValue = logLevelValues[level];
 
-	const final: string = config.pattern
-		.replace(/{timestamp}/g, timestamp)
+	const final = config.pattern
+		.replace(/{timestamp}/g, config.prettyPrint ? prettyTimestamp : timestamp)
 		.replace(/{level-name}/g, level.toUpperCase())
 		.replace(/{level}/g, String(numericLevel))
 		.replace(/{file-name}/g, fileName)
 		.replace(/{line}/g, line)
 		.replace(/{data}/g, resolvedData)
-		.replace(/{id}/g, generateShortId())
+		.replace(/{id}/g, id)
 		.replace(/{column}/g, column);
 
-	return config.consoleColor ? replaceColorTokens(final, level, config) : final;
+	return replaceColorTokens(final, level, config);
 }
 
-export { parsePattern };
+export { parsePattern, getCallerInfo };

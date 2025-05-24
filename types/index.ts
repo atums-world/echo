@@ -9,7 +9,6 @@ type LoggerConfig = {
 	disableFile?: boolean;
 
 	rotate?: boolean;
-	maxSizeMB?: number;
 	maxFiles?: number;
 
 	console?: boolean;
@@ -22,6 +21,8 @@ type LoggerConfig = {
 
 	pattern?: string;
 	levelColor?: Partial<Record<LogLevel, keyof typeof ansiColors>>;
+
+	prettyPrint?: boolean;
 };
 
 interface PatternContext {

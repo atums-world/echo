@@ -7,13 +7,14 @@ import {
 	statSync,
 } from "node:fs";
 import { resolve } from "node:path";
-import { parsePattern } from "@lib/char";
+import { getCallerInfo, parsePattern } from "@lib/char";
 import {
 	defaultConfig,
 	loadEnvConfig,
 	loadLoggerConfig,
 	logLevelValues,
 } from "@lib/config";
+import { writeLogJson } from "@lib/file";
 import type { LogLevel, LoggerConfig } from "@types";
 
 class Echo {
@@ -73,12 +74,17 @@ class Echo {
 		)
 			return;
 
+		const meta = getCallerInfo(this.config);
 		const line = parsePattern({ level, data, config: this.config });
 
 		if (this.config.console) {
 			console[level === "error" ? "error" : level === "warn" ? "warn" : "log"](
 				line,
 			);
+		}
+
+		if (!this.config.disableFile) {
+			writeLogJson(level, data, meta, this.config);
 		}
 	}
 

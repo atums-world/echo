@@ -12,6 +12,16 @@ const logLevelValues = {
 	silent: 70,
 };
 
+const defaultLevelColor: Record<LogLevel, keyof typeof ansiColors> = {
+	trace: "cyan",
+	debug: "blue",
+	info: "green",
+	warn: "yellow",
+	error: "red",
+	fatal: "red",
+	silent: "gray",
+};
+
 const ansiColors: Record<string, string> = {
 	reset: "\x1b[0m",
 	dim: "\x1b[2m",
@@ -33,7 +43,6 @@ const defaultConfig: Required<LoggerConfig> = {
 	disableFile: false,
 
 	rotate: true,
-	maxSizeMB: 5,
 	maxFiles: 3,
 
 	console: true,
@@ -55,6 +64,8 @@ const defaultConfig: Required<LoggerConfig> = {
 		error: "red",
 		fatal: "red",
 	},
+
+	prettyPrint: true,
 };
 
 function loadLoggerConfig(configPath = "logger.json"): LoggerConfig {
@@ -75,8 +86,6 @@ function loadEnvConfig(): LoggerConfig {
 	if (process.env.LOG_DISABLE_FILE)
 		config.disableFile = process.env.LOG_DISABLE_FILE === "true";
 	if (process.env.LOG_ROTATE) config.rotate = process.env.LOG_ROTATE === "true";
-	if (process.env.LOG_MAX_SIZE_MB)
-		config.maxSizeMB = Number.parseInt(process.env.LOG_MAX_SIZE_MB, 10);
 	if (process.env.LOG_MAX_FILES)
 		config.maxFiles = Number.parseInt(process.env.LOG_MAX_FILES, 10);
 	if (process.env.LOG_CONSOLE)
@@ -88,12 +97,15 @@ function loadEnvConfig(): LoggerConfig {
 	if (process.env.LOG_TIMEZONE) config.timezone = process.env.LOG_TIMEZONE;
 	if (process.env.LOG_SILENT) config.silent = process.env.LOG_SILENT === "true";
 	if (process.env.LOG_PATTERN) config.pattern = process.env.LOG_PATTERN;
+	if (process.env.LOG_PRETTY_PRINT)
+		config.prettyPrint = process.env.LOG_PRETTY_PRINT === "true";
 
 	return config;
 }
 
 export {
 	defaultConfig,
+	defaultLevelColor,
 	loadLoggerConfig,
 	loadEnvConfig,
 	logLevelValues,

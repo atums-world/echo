@@ -1,0 +1,181 @@
+# @atums/echo
+
+A minimal, flexible logger for Node with:
+
+- Colored console output
+- Daily `.jsonl` file logging
+- Configurable output patterns
+- Structured logs with caller metadata
+- Fully typed config with environment/file/constructor override
+
+---
+
+## Features
+
+- Console and file logging with level-based filtering
+- Colored output with ANSI formatting
+- Daily rotated `.jsonl` files
+- Supports runtime configuration merging
+- Auto-formatted output using custom patterns
+- Includes caller file, line, and column
+- Pretty-prints structured objects if enabled
+- Flushes open file streams on exit
+- Uses Biome and EditorConfig for formatting and linting
+
+---
+
+## Installation
+
+```bash
+bun add @atums/echo
+```
+
+---
+
+## Usage
+
+```ts
+import { echo } from "@atums/echo";
+
+echo.info("App started");
+echo.debug({ state: "init", ok: true });
+
+try {
+	throw new Error("Something failed");
+} catch (err) {
+	echo.error(err);
+}
+```
+
+---
+
+## Configuration
+
+Logger config can be defined in three ways:
+
+1. JSON file (e.g. `logger.json`)
+2. Environment variables
+3. Constructor override
+
+Priority (highest to lowest):
+
+```
+constructor > environment > logger.json > defaults
+```
+
+---
+
+### logger.json example
+
+```json
+{
+  "directory": "logs",
+  "level": "debug",
+  "console": true,
+  "consoleColor": true,
+  "rotate": true,
+  "maxFiles": 3,
+  "prettyPrint": true,
+  "pattern": "{color:gray}{timestamp}{reset} {color:levelColor}[{level-name}]{reset} ({file-name}:{line}:{column}) {data}"
+}
+```
+
+---
+
+### Supported Environment Variables
+
+| Variable              | Description                              |
+|------------------------|------------------------------------------|
+| `LOG_LEVEL`            | Log level (`debug`, `info`, etc.)        |
+| `LOG_DIRECTORY`        | Log directory path (default: `logs`)     |
+| `LOG_DISABLE_FILE`     | Disable file output (`true` or `false`)  |
+| `LOG_ROTATE`           | Enable daily rotation                    |
+| `LOG_MAX_FILES`        | Max rotated files to keep                |
+| `LOG_CONSOLE`          | Enable console output                    |
+| `LOG_CONSOLE_COLOR`    | Enable ANSI color in console output      |
+| `LOG_DATE_FORMAT`      | Date format for display timestamp        |
+| `LOG_TIMEZONE`         | Timezone (`local` or IANA string)        |
+| `LOG_SILENT`           | Completely disable output                |
+| `LOG_PATTERN`          | Custom log format for console            |
+| `LOG_PRETTY_PRINT`     | Pretty-print objects in console output   |
+
+---
+
+## Pattern Tokens
+
+These tokens are replaced in the log pattern:
+
+| Token         | Description                             |
+|---------------|-----------------------------------------|
+| `{timestamp}` | Formatted display timestamp             |
+| `{level-name}`| Uppercase log level (e.g. DEBUG)        |
+| `{level}`     | Numeric log level                       |
+| `{file-name}` | Source filename                         |
+| `{line}`      | Line number in source                   |
+| `{column}`    | Column number in source                 |
+| `{data}`      | Formatted log data (message/object)     |
+| `{id}`        | Unique short ID for the log             |
+| `{color:*}`   | ANSI color start (e.g. `{color:red}`)   |
+| `{reset}`     | Resets console color                    |
+
+---
+
+## Output Examples
+
+### Console (with colors)
+
+```
+2025-05-24 16:15:00.000 [INFO] (index.ts:3:6) Server started
+```
+
+### File (`logs/2025-05-24.jsonl`)
+
+Each line is structured JSON:
+
+```json
+{
+  "timestamp": 1748115300000,
+  "level": "info",
+  "id": "aB4cD9xZ",
+  "file": "index.ts",
+  "line": "3",
+  "column": "6",
+  "data": "Server started"
+}
+```
+
+If an error is logged:
+
+```json
+{
+  "timestamp": 1748115301000,
+  "level": "error",
+  "id": "qW3eR7tU",
+  "file": "index.ts",
+  "line": "10",
+  "column": "12",
+  "data": {
+    "name": "Error",
+    "message": "Something failed",
+    "stack": "Error: Something failed\n  at index.ts:10:12"
+  }
+}
+```
+
+---
+
+## Development
+
+This project uses:
+
+- TypeScript
+- Bun runtime
+- Biome for formatting/linting
+- JSONL for structured file output
+- `date-fns-tz` for timezone support
+
+---
+
+## License
+
+BSD 3-Clause [License](License)
