@@ -7,20 +7,27 @@ import {
 	statSync,
 } from "node:fs";
 import { resolve } from "node:path";
-import { defaultConfig, loadEnvConfig, loadLoggerConfig } from "@lib/config";
+import { parsePattern } from "@lib/char";
+import {
+	defaultConfig,
+	loadEnvConfig,
+	loadLoggerConfig,
+	logLevelValues,
+} from "@lib/config";
+import type { LogLevel, LoggerConfig } from "@types";
 
-export class Echo {
+class Echo {
 	private readonly directory: string;
 	private readonly config: Required<LoggerConfig>;
 
-	constructor(configOrPath?: string | LoggerConfig) {
+	constructor(config?: string | LoggerConfig) {
 		const fileConfig: LoggerConfig =
-			typeof configOrPath === "string"
-				? loadLoggerConfig(configOrPath)
+			typeof config === "string"
+				? loadLoggerConfig(config)
 				: loadLoggerConfig();
 
 		const overrideConfig: LoggerConfig =
-			typeof configOrPath === "object" ? configOrPath : {};
+			typeof config === "object" ? config : {};
 
 		const envConfig: LoggerConfig = loadEnvConfig();
 
@@ -58,4 +65,47 @@ export class Echo {
 	public getConfig(): Required<LoggerConfig> {
 		return this.config;
 	}
+
+	private log(level: LogLevel, data: unknown): void {
+		if (
+			this.config.silent ||
+			logLevelValues[this.config.level] > logLevelValues[level]
+		)
+			return;
+
+		const line = parsePattern({ level, data, config: this.config });
+
+		if (this.config.console) {
+			console[level === "error" ? "error" : level === "warn" ? "warn" : "log"](
+				line,
+			);
+		}
+	}
+
+	public debug(data: unknown): void {
+		this.log("debug", data);
+	}
+
+	public info(data: unknown): void {
+		this.log("info", data);
+	}
+
+	public warn(data: unknown): void {
+		this.log("warn", data);
+	}
+
+	public error(data: unknown): void {
+		this.log("error", data);
+	}
+
+	public fatal(data: unknown): void {
+		this.log("fatal", data);
+	}
+
+	public trace(data: unknown): void {
+		this.log("trace", data);
+	}
 }
+
+const echo = new Echo();
+export { echo, Echo };

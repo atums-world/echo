@@ -1,5 +1,31 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import type { LogLevel, LoggerConfig } from "@types";
+
+const logLevelValues = {
+	trace: 10,
+	debug: 20,
+	info: 30,
+	warn: 40,
+	error: 50,
+	fatal: 60,
+	silent: 70,
+};
+
+const ansiColors: Record<string, string> = {
+	reset: "\x1b[0m",
+	dim: "\x1b[2m",
+	bright: "\x1b[1m",
+	black: "\x1b[30m",
+	red: "\x1b[31m",
+	green: "\x1b[32m",
+	yellow: "\x1b[33m",
+	blue: "\x1b[34m",
+	magenta: "\x1b[35m",
+	cyan: "\x1b[36m",
+	white: "\x1b[37m",
+	gray: "\x1b[90m",
+};
 
 const defaultConfig: Required<LoggerConfig> = {
 	directory: "logs",
@@ -13,12 +39,22 @@ const defaultConfig: Required<LoggerConfig> = {
 	console: true,
 	consoleColor: true,
 
-	dateFormat: "YYYY-MM-DD HH:mm:ss",
-	timezone: "UTC",
+	dateFormat: "yyyy-MM-dd HH:mm:ss.SSS",
+	timezone: "local",
 
 	silent: false,
 
-	pattern: "{timestamp} [{level-name}] ({file-name}:{line}){message}",
+	pattern:
+		"{color:gray}{timestamp}{reset} {color:levelColor}[{level-name}]{reset} {color:gray}({reset}{file-name}:{line}:{column}{color:gray}){reset} {data}",
+
+	levelColor: {
+		trace: "cyan",
+		debug: "blue",
+		info: "green",
+		warn: "yellow",
+		error: "red",
+		fatal: "red",
+	},
 };
 
 function loadLoggerConfig(configPath = "logger.json"): LoggerConfig {
@@ -56,4 +92,10 @@ function loadEnvConfig(): LoggerConfig {
 	return config;
 }
 
-export { defaultConfig, loadLoggerConfig, loadEnvConfig };
+export {
+	defaultConfig,
+	loadLoggerConfig,
+	loadEnvConfig,
+	logLevelValues,
+	ansiColors,
+};

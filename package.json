@@ -7,14 +7,28 @@
 	"main": "./dist/index.js",
 	"module": "./dist/index.mjs",
 	"types": "./dist/index.d.ts",
+	"typesVersions": {
+		"*": {
+			"lib/char": ["./dist/lib/char.d.ts"],
+			"lib/config": ["./dist/lib/config.d.ts"]
+		}
+	},
 	"exports": {
 		".": {
 			"import": "./dist/index.js",
-			"require": "./dist/index.js",
-			"types": "./dist/index.d.ts"
+			"require": "./dist/index.js"
+		},
+		"./lib/char": {
+			"import": "./dist/lib/char.js",
+			"require": "./dist/lib/char.js"
+		},
+		"./lib/config": {
+			"import": "./dist/lib/config.js",
+			"require": "./dist/lib/config.js"
 		}
 	},
 	"scripts": {
+		"build": "rm -rf dist && tsup src/index.ts --dts --out-dir dist --format esm,cjs",
 		"lint": "bunx biome check",
 		"lint:fix": "bunx biome check --fix",
 		"cleanup": "rm -rf logs node_modules bun.lock"
@@ -22,11 +36,16 @@
 	"license": "BSD-3-Clause",
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
-		"@types/bun": "^1.2.13"
+		"@types/bun": "^1.2.13",
+		"tsup": "^8.5.0",
+		"typescript": "^5.8.3"
 	},
 	"files": ["dist", "README.md", "LICENSE"],
 	"repository": {
 		"type": "git",
-		"url": "https://git.creations.works/creations/logger.git"
+		"url": "https://git.creations.works/atums/echo"
+	},
+	"dependencies": {
+		"date-fns-tz": "^3.2.0"
 	}
 }
