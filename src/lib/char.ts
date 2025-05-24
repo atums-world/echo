@@ -146,7 +146,7 @@ function parsePattern(ctx: PatternContext): string {
 		config.prettyPrint && typeof data === "object" && data !== null
 			? inspect(data, {
 					depth: null,
-					colors: true,
+					colors: config.consoleColor,
 					breakLength: 1,
 					compact: false,
 				})
@@ -155,7 +155,8 @@ function parsePattern(ctx: PatternContext): string {
 	const numericLevel: LogLevelValue = logLevelValues[level];
 
 	const final = config.pattern
-		.replace(/{timestamp}/g, config.prettyPrint ? prettyTimestamp : timestamp)
+		.replace(/{timestamp}/g, timestamp)
+		.replace(/{pretty-timestamp}/g, prettyTimestamp)
 		.replace(/{level-name}/g, level.toUpperCase())
 		.replace(/{level}/g, String(numericLevel))
 		.replace(/{file-name}/g, fileName)
@@ -167,4 +168,4 @@ function parsePattern(ctx: PatternContext): string {
 	return replaceColorTokens(final, level, config);
 }
 
-export { parsePattern, getCallerInfo };
+export { parsePattern, getCallerInfo, getTimestamp, generateShortId };

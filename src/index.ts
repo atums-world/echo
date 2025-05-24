@@ -7,8 +7,10 @@ import {
 	statSync,
 } from "node:fs";
 import { resolve } from "node:path";
-import { getCallerInfo, parsePattern } from "@lib/char";
+import { format, inspect } from "node:util";
+import { getCallerInfo, getTimestamp, parsePattern } from "@lib/char";
 import {
+	ansiColors,
 	defaultConfig,
 	loadEnvConfig,
 	loadLoggerConfig,
@@ -110,6 +112,47 @@ class Echo {
 
 	public trace(data: unknown): void {
 		this.log("trace", data);
+	}
+
+	public custom(tag: string, context: string, message: unknown): void {
+		if (this.config.silent || !this.config.console) return;
+
+		const timestamps = getTimestamp(this.config);
+
+		const normalizedTag = tag.toUpperCase();
+		const tagColor = this.config.consoleColor
+			? (ansiColors[this.config.customColors?.[normalizedTag] ?? "green"] ?? "")
+			: "";
+		const contextColor = this.config.consoleColor ? ansiColors.cyan : "";
+		const gray = this.config.consoleColor ? ansiColors.gray : "";
+		const reset = this.config.consoleColor ? ansiColors.reset : "";
+
+		const resolvedData =
+			this.config.prettyPrint && typeof message === "object" && message !== null
+				? inspect(message, {
+						depth: null,
+						colors: this.config.consoleColor,
+						breakLength: 1,
+						compact: false,
+					})
+				: format(message);
+
+		const pattern =
+			this.config.customPattern ??
+			"{color:gray}{pretty-timestamp}{reset} {color:tagColor}[{tag}]{reset} {color:contextColor}({context}){reset} {data}";
+
+		const line = pattern
+			.replace(/{timestamp}/g, timestamps.timestamp)
+			.replace(/{pretty-timestamp}/g, timestamps.prettyTimestamp)
+			.replace(/{tag}/g, tag)
+			.replace(/{context}/g, context)
+			.replace(/{data}/g, resolvedData)
+			.replace(/{color:gray}/g, gray)
+			.replace(/{color:tagColor}/g, tagColor)
+			.replace(/{color:contextColor}/g, contextColor)
+			.replace(/{reset}/g, reset);
+
+		console.log(line);
 	}
 }
 

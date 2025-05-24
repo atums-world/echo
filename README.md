@@ -76,7 +76,13 @@ constructor > environment > logger.json > defaults
   "rotate": true,
   "maxFiles": 3,
   "prettyPrint": true,
-  "pattern": "{color:gray}{timestamp}{reset} {color:levelColor}[{level-name}]{reset} ({file-name}:{line}:{column}) {data}"
+  "pattern": "{color:gray}{timestamp}{reset} {color:levelColor}[{level-name}]{reset} ({file-name}:{line}:{column}) {data}",
+  "customPattern": "{color:gray}{pretty-timestamp}{reset} {color:tagColor}[{tag}]{reset} {color:contextColor}({context}){reset} {data}",
+  "customColors": {
+    "GET": "green",
+    "POST": "blue",
+    "DELETE": "red"
+  }
 }
 ```
 
@@ -84,20 +90,23 @@ constructor > environment > logger.json > defaults
 
 ### Supported Environment Variables
 
-| Variable              | Description                              |
-|------------------------|------------------------------------------|
-| `LOG_LEVEL`            | Log level (`debug`, `info`, etc.)        |
-| `LOG_DIRECTORY`        | Log directory path (default: `logs`)     |
-| `LOG_DISABLE_FILE`     | Disable file output (`true` or `false`)  |
-| `LOG_ROTATE`           | Enable daily rotation                    |
-| `LOG_MAX_FILES`        | Max rotated files to keep                |
-| `LOG_CONSOLE`          | Enable console output                    |
-| `LOG_CONSOLE_COLOR`    | Enable ANSI color in console output      |
-| `LOG_DATE_FORMAT`      | Date format for display timestamp        |
-| `LOG_TIMEZONE`         | Timezone (`local` or IANA string)        |
-| `LOG_SILENT`           | Completely disable output                |
-| `LOG_PATTERN`          | Custom log format for console            |
-| `LOG_PRETTY_PRINT`     | Pretty-print objects in console output   |
+| Variable               | Description                                   |
+|------------------------|-----------------------------------------------|
+| `LOG_LEVEL`            | Log level (`debug`, `info`, etc.)             |
+| `LOG_LEVEL_COLOR`      | Comma-separated list of `TAG:color` pairs     |
+| `LOG_DIRECTORY`        | Log directory path (default: `logs`)          |
+| `LOG_DISABLE_FILE`     | Disable file output (`true` or `false`)       |
+| `LOG_ROTATE`           | Enable daily rotation                         |
+| `LOG_MAX_FILES`        | Max rotated files to keep                     |
+| `LOG_CONSOLE`          | Enable console output                         |
+| `LOG_CONSOLE_COLOR`    | Enable ANSI color in console output           |
+| `LOG_DATE_FORMAT`      | Date format for display timestamp             |
+| `LOG_TIMEZONE`         | Timezone (`local` or IANA string)             |
+| `LOG_SILENT`           | Completely disable output                     |
+| `LOG_PATTERN`          | Custom log format for console                 |
+| `LOG_PRETTY_PRINT`     | Pretty-print objects in console output        |
+| `LOG_CUSTOM_PATTERN`   | Pattern used for `echo.custom()` logs         |
+| `LOG_CUSTOM_COLORS`    | Comma-separated list of `TAG:color` pairs     |
 
 ---
 
@@ -105,18 +114,45 @@ constructor > environment > logger.json > defaults
 
 These tokens are replaced in the log pattern:
 
-| Token         | Description                             |
-|---------------|-----------------------------------------|
-| `{timestamp}` | Formatted display timestamp             |
-| `{level-name}`| Uppercase log level (e.g. DEBUG)        |
-| `{level}`     | Numeric log level                       |
-| `{file-name}` | Source filename                         |
-| `{line}`      | Line number in source                   |
-| `{column}`    | Column number in source                 |
-| `{data}`      | Formatted log data (message/object)     |
-| `{id}`        | Unique short ID for the log             |
-| `{color:*}`   | ANSI color start (e.g. `{color:red}`)   |
-| `{reset}`     | Resets console color                    |
+| Token                | Description                                     |
+|----------------------|-------------------------------------------------|
+| `{timestamp}`        | ISO timestamp string                            |
+| `{pretty-timestamp}` | Formatted display timestamp                     |
+| `{level-name}`       | Uppercase log level (e.g. DEBUG)                |
+| `{level}`            | Numeric log level                               |
+| `{file-name}`        | Source filename                                 |
+| `{line}`             | Line number in source                           |
+| `{column}`           | Column number in source                         |
+| `{data}`             | Formatted log data (message/object)             |
+| `{id}`               | Unique short ID for the log                     |
+| `{tag}`              | Custom tag used in `echo.custom()`              |
+| `{context}`          | Custom context in `echo.custom()`              |
+| `{color:*}`          | ANSI color start (e.g. `{color:red}`)           |
+| `{color:levelColor}` | Dynamic color based on log level                |
+| `{color:tagColor}`   | Color for custom tag                            |
+| `{color:contextColor}`| Color for custom context                       |
+| `{reset}`            | Resets console color                            |
+
+---
+
+## Custom Log Entries
+
+You can log arbitrary tagged messages with `echo.custom(tag, context, message)`:
+
+```ts
+echo.custom("GET", "/health", { status: 200 });
+```
+
+The output format is controlled by:
+
+- `customPattern` — e.g. `{pretty-timestamp} [GET] (/health) { status: 200 }`
+- `customColors` — define colors for tags like `"GET": "green"`
+
+### Example output
+
+```
+2025-05-24 16:22:00.123 [GET] (/health) { status: 200 }
+```
 
 ---
 

@@ -22,6 +22,9 @@ type LoggerConfig = {
 	pattern?: string;
 	levelColor?: Partial<Record<LogLevel, keyof typeof ansiColors>>;
 
+	customPattern?: string;
+	customColors?: Record<string, keyof typeof ansiColors>;
+
 	prettyPrint?: boolean;
 };
 

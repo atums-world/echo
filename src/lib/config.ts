@@ -54,7 +54,7 @@ const defaultConfig: Required<LoggerConfig> = {
 	silent: false,
 
 	pattern:
-		"{color:gray}{timestamp}{reset} {color:levelColor}[{level-name}]{reset} {color:gray}({reset}{file-name}:{line}:{column}{color:gray}){reset} {data}",
+		"{color:gray}{pretty-timestamp}{reset} {color:levelColor}[{level-name}]{reset} {color:gray}({reset}{file-name}:{line}:{column}{color:gray}){reset} {data}",
 
 	levelColor: {
 		trace: "cyan",
@@ -64,6 +64,10 @@ const defaultConfig: Required<LoggerConfig> = {
 		error: "red",
 		fatal: "red",
 	},
+
+	customColors: {},
+	customPattern:
+		"{color:gray}{pretty-timestamp}{reset} {color:tagColor}[{tag}]{reset} {color:contextColor}({context}){reset} {data}",
 
 	prettyPrint: true,
 };
@@ -99,6 +103,30 @@ function loadEnvConfig(): LoggerConfig {
 	if (process.env.LOG_PATTERN) config.pattern = process.env.LOG_PATTERN;
 	if (process.env.LOG_PRETTY_PRINT)
 		config.prettyPrint = process.env.LOG_PRETTY_PRINT === "true";
+
+	if (process.env.LOG_LEVEL_COLOR) {
+		const colors = process.env.LOG_LEVEL_COLOR.split(",");
+		for (const color of colors) {
+			const [level, colorName] = color.split(":");
+			if (logLevelValues[level as LogLevel] !== undefined) {
+				config.levelColor = {
+					...config.levelColor,
+					[level as LogLevel]: colorName as keyof typeof ansiColors,
+				};
+			}
+		}
+	}
+
+	if (process.env.LOG_CUSTOM_COLORS) {
+		const colors = process.env.LOG_CUSTOM_COLORS.split(",");
+		for (const color of colors) {
+			const [tag, colorName] = color.split(":");
+			config.customColors = {
+				...config.customColors,
+				[tag]: colorName as keyof typeof ansiColors,
+			};
+		}
+	}
 
 	return config;
 }
