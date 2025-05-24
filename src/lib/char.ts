@@ -78,7 +78,7 @@ function getCallerInfo(config: Required<LoggerConfig>): {
 			};
 		}
 
-		const rawMatch = line.match(/at\s+(\/.*):(\d+):(\d+)/);
+		const rawMatch = line.match(/at\s+(?:.*\()?(.+):(\d+):(\d+)\)?/);
 		if (rawMatch) {
 			const fullPath = rawMatch[1];
 			const lineNumber = rawMatch[2];
@@ -146,7 +146,7 @@ function parsePattern(ctx: PatternContext): string {
 		config.prettyPrint && typeof data === "object" && data !== null
 			? inspect(data, {
 					depth: null,
-					colors: false,
+					colors: true,
 					breakLength: 1,
 					compact: false,
 				})
