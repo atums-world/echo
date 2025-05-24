@@ -1,0 +1,32 @@
+{
+	"name": "@atums/echo",
+	"version": "1.0.0",
+	"description": "",
+	"private": false,
+	"type": "module",
+	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"require": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		}
+	},
+	"scripts": {
+		"lint": "bunx biome check",
+		"lint:fix": "bunx biome check --fix",
+		"cleanup": "rm -rf logs node_modules bun.lock"
+	},
+	"license": "BSD-3-Clause",
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.4",
+		"@types/bun": "^1.2.13"
+	},
+	"files": ["dist", "README.md", "LICENSE"],
+	"repository": {
+		"type": "git",
+		"url": "https://git.creations.works/creations/logger.git"
+	}
+}
