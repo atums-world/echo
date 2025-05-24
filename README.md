@@ -212,6 +212,24 @@ This project uses:
 
 ---
 
+## Images
+
+<details>
+<summary>Logger preview (pretty)</summary>
+
+![Logger preview](demo/image.png)
+
+</details>
+
+<details>
+<summary>Logger preview (no pretty)</summary>
+
+![Logger preview no-pretty](demo/image-no-pretty.png)
+
+</details>
+
+---
+
 ## License
 
 BSD 3-Clause [License](License)
