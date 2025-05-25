@@ -1,7 +1,7 @@
 {
 	"name": "@atums/echo",
-	"version": "1.0.1",
-	"description": "",
+	"version": "1.0.2",
+	"description": "A minimal, flexible logger",
 	"private": false,
 	"type": "module",
 	"main": "./dist/index.js",
@@ -28,6 +28,7 @@
 		}
 	},
 	"scripts": {
+		"dev": "bun run build --watch",
 		"build": "rm -rf dist && tsup src/index.ts --dts --out-dir dist --format esm,cjs",
 		"lint": "bunx biome check",
 		"lint:fix": "bunx biome check --fix",

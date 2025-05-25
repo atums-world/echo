@@ -16,12 +16,13 @@ import {
 	loadLoggerConfig,
 	logLevelValues,
 } from "@lib/config";
-import { writeLogJson } from "@lib/file";
+import { FileLogger } from "@lib/file";
 import type { LogLevel, LoggerConfig } from "@types";
 
 class Echo {
 	private readonly directory: string;
 	private readonly config: Required<LoggerConfig>;
+	private readonly fileLogger: FileLogger | null = null;
 
 	constructor(config?: string | LoggerConfig) {
 		const fileConfig: LoggerConfig =
@@ -45,6 +46,8 @@ class Echo {
 
 		if (!this.config.disableFile) {
 			Echo.validateDirectory(this.directory);
+
+			this.fileLogger = new FileLogger(this.config);
 		}
 	}
 
@@ -59,14 +62,6 @@ class Echo {
 		}
 
 		accessSync(dir, constants.W_OK);
-	}
-
-	public getDirectory(): string {
-		return this.directory;
-	}
-
-	public getConfig(): Required<LoggerConfig> {
-		return this.config;
 	}
 
 	private log(level: LogLevel, data: unknown): void {
@@ -85,8 +80,8 @@ class Echo {
 			);
 		}
 
-		if (!this.config.disableFile) {
-			writeLogJson(level, data, meta, this.config);
+		if (!this.config.disableFile && this.fileLogger) {
+			this.fileLogger.write(level, data, meta);
 		}
 	}
 
@@ -114,8 +109,8 @@ class Echo {
 		this.log("trace", data);
 	}
 
-	public custom(tag: string, context: string, message: unknown): void {
-		if (this.config.silent || !this.config.console) return;
+	public custom(tag: string, context: string, data: unknown): void {
+		if (this.config.silent) return;
 
 		const timestamps = getTimestamp(this.config);
 
@@ -128,14 +123,14 @@ class Echo {
 		const reset = this.config.consoleColor ? ansiColors.reset : "";
 
 		const resolvedData =
-			this.config.prettyPrint && typeof message === "object" && message !== null
-				? inspect(message, {
+			this.config.prettyPrint && typeof data === "object" && data !== null
+				? inspect(data, {
 						depth: null,
 						colors: this.config.consoleColor,
 						breakLength: 1,
 						compact: false,
 					})
-				: format(message);
+				: format(data);
 
 		const pattern =
 			this.config.customPattern ??
@@ -152,9 +147,25 @@ class Echo {
 			.replace(/{color:contextColor}/g, contextColor)
 			.replace(/{reset}/g, reset);
 
-		console.log(line);
+		if (this.config.console) {
+			console.log(line);
+		}
+
+		if (!this.config.disableFile && this.fileLogger) {
+			const meta = getCallerInfo(this.config);
+			this.fileLogger.write(tag, { context, data }, meta);
+		}
+	}
+
+	public flush(): Promise<void> {
+		return this.fileLogger?.flush() ?? Promise.resolve();
 	}
 }
 
+function createLogger(config?: string | LoggerConfig): Echo {
+	return new Echo(config);
+}
+
 const echo = new Echo();
-export { echo, Echo };
+export { echo, Echo, createLogger };
+export type { LoggerConfig, LogLevel } from "@types";

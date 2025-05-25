@@ -69,20 +69,43 @@ constructor > environment > logger.json > defaults
 
 ```json
 {
-  "directory": "logs",
-  "level": "debug",
-  "console": true,
-  "consoleColor": true,
-  "rotate": true,
-  "maxFiles": 3,
-  "prettyPrint": true,
-  "pattern": "{color:gray}{timestamp}{reset} {color:levelColor}[{level-name}]{reset} ({file-name}:{line}:{column}) {data}",
-  "customPattern": "{color:gray}{pretty-timestamp}{reset} {color:tagColor}[{tag}]{reset} {color:contextColor}({context}){reset} {data}",
-  "customColors": {
-    "GET": "green",
-    "POST": "blue",
-    "DELETE": "red"
-  }
+	"directory": "logs",
+	"level": "debug",
+	"disableFile": false,
+
+	"rotate": true,
+	"maxFiles": 3,
+
+	"console": true,
+	"consoleColor": true,
+
+	"dateFormat": "yyyy-MM-dd HH:mm:ss.SSS",
+	"timezone": "local",
+
+	"silent": false,
+
+	"pattern": "{color:gray}{timestamp}{reset} {color:levelColor}[{level-name}]{reset} {color:gray}({reset}{file-name}:{line}:{column}{color:gray}){reset} {data}",
+	"levelColor": {
+		"debug": "blue",
+		"info": "green",
+		"warn": "yellow",
+		"error": "red",
+		"fatal": "red"
+	},
+
+	"customPattern": "{color:gray}{pretty-timestamp}{reset} {color:tagColor}[{tag}]{reset} {color:contextColor}({context}){reset} {data}",
+	"customColors": {
+		"GET": "red",
+		"POST": "blue",
+		"PUT": "yellow",
+		"DELETE": "red",
+		"PATCH": "cyan",
+		"HEAD": "magenta",
+		"OPTIONS": "white",
+		"TRACE": "gray"
+	},
+
+	"prettyPrint": true
 }
 ```
 
@@ -158,7 +181,7 @@ The output format is controlled by:
 
 ## Output Examples
 
-### Console (with colors)
+### Console
 
 ```
 2025-05-24 16:15:00.000 [INFO] (index.ts:3:6) Server started

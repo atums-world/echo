@@ -41,13 +41,14 @@ function getCallerInfo(config: Required<LoggerConfig>): {
 } {
 	const id = generateShortId();
 
+	const timestampInfo = getTimestamp(config);
 	const fallback = {
-		id: id,
+		id,
 		fileName: "unknown",
 		line: "0",
-		timestamp: getTimestamp(config).timestamp,
-		prettyTimestamp: getTimestamp(config).prettyTimestamp,
 		column: "0",
+		timestamp: timestampInfo.timestamp,
+		prettyTimestamp: timestampInfo.prettyTimestamp,
 	};
 
 	const stack = new Error().stack;
@@ -73,8 +74,8 @@ function getCallerInfo(config: Required<LoggerConfig>): {
 				fileName: basename(fullPath),
 				line: lineNumber,
 				column: columnNumber,
-				timestamp: getTimestamp(config).timestamp,
-				prettyTimestamp: getTimestamp(config).prettyTimestamp,
+				timestamp: timestampInfo.timestamp,
+				prettyTimestamp: timestampInfo.prettyTimestamp,
 			};
 		}
 
@@ -97,8 +98,8 @@ function getCallerInfo(config: Required<LoggerConfig>): {
 				fileName: basename(fullPath),
 				line: lineNumber,
 				column: columnNumber,
-				timestamp: getTimestamp(config).timestamp,
-				prettyTimestamp: getTimestamp(config).prettyTimestamp,
+				timestamp: timestampInfo.timestamp,
+				prettyTimestamp: timestampInfo.prettyTimestamp,
 			};
 		}
 	}
