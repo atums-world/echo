@@ -40,7 +40,6 @@ function getCallerInfo(config: Required<LoggerConfig>): {
 	prettyTimestamp: string;
 } {
 	const id = generateShortId();
-
 	const timestampInfo = getTimestamp(config);
 	const fallback = {
 		id,
@@ -52,9 +51,7 @@ function getCallerInfo(config: Required<LoggerConfig>): {
 	};
 
 	const stack = new Error().stack;
-	if (!stack) {
-		return fallback;
-	}
+	if (!stack) return fallback;
 
 	const lines = stack.split("\n");
 
@@ -65,12 +62,14 @@ function getCallerInfo(config: Required<LoggerConfig>): {
 			/at\s+(?:.*\()?file:\/\/(.*):(\d+):(\d+)\)?/,
 		);
 		if (fileURLMatch) {
-			const fullPath = fileURLMatch[1];
-			const lineNumber = fileURLMatch[2];
-			const columnNumber = fileURLMatch[3];
+			const [_, fullPath, lineNumber, columnNumber] = fileURLMatch;
+			const isInternal =
+				fullPath.includes("atums.echo") || fullPath.includes("@atums/echo");
+
+			if (isInternal) continue;
 
 			return {
-				id: id,
+				id,
 				fileName: basename(fullPath),
 				line: lineNumber,
 				column: columnNumber,
@@ -81,17 +80,11 @@ function getCallerInfo(config: Required<LoggerConfig>): {
 
 		const rawMatch = line.match(/at\s+(?:.*\()?(.+):(\d+):(\d+)\)?/);
 		if (rawMatch) {
-			const fullPath = rawMatch[1];
-			const lineNumber = rawMatch[2];
-			const columnNumber = rawMatch[3];
+			const [_, fullPath, lineNumber, columnNumber] = rawMatch;
+			const isInternal =
+				fullPath.includes("atums.echo") || fullPath.includes("@atums/echo");
 
-			if (
-				fullPath.includes("/logger/") ||
-				fullPath.includes("/src/index.ts") ||
-				fullPath.includes("/src/lib/")
-			) {
-				continue;
-			}
+			if (isInternal) continue;
 
 			return {
 				id: id,

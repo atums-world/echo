@@ -1,6 +1,6 @@
 {
 	"name": "@atums/echo",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "A minimal, flexible logger",
 	"private": false,
 	"type": "module",
