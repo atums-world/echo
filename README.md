@@ -4,7 +4,7 @@ A minimal, flexible logger for Node with:
 
 - Colored console output
 - Daily `.jsonl` file logging
-- Configurable output patterns
+- Configurable output patterns and file naming
 - Structured logs with caller metadata
 - Fully typed config with environment/file/constructor override
 
@@ -14,7 +14,7 @@ A minimal, flexible logger for Node with:
 
 - Console and file logging with level-based filtering
 - Colored output with ANSI formatting
-- Daily rotated `.jsonl` files
+- Daily rotated `.jsonl` files with custom naming patterns
 - Supports runtime configuration merging
 - Auto-formatted output using custom patterns
 - Includes caller file, line, and column
@@ -75,6 +75,7 @@ constructor > environment > logger.json > defaults
 
 	"rotate": true,
 	"maxFiles": 3,
+	"fileNameFormat": "yyyy-MM-dd",
 
 	"console": true,
 	"consoleColor": true,
@@ -121,6 +122,7 @@ constructor > environment > logger.json > defaults
 | `LOG_DISABLE_FILE`     | Disable file output (`true` or `false`)       |
 | `LOG_ROTATE`           | Enable daily rotation                         |
 | `LOG_MAX_FILES`        | Max rotated files to keep                     |
+| `LOG_FILE_NAME_FORMAT` | Custom file name format (default: yyyy-MM-dd) |
 | `LOG_CONSOLE`          | Enable console output                         |
 | `LOG_CONSOLE_COLOR`    | Enable ANSI color in console output           |
 | `LOG_DATE_FORMAT`      | Date format for display timestamp             |
@@ -130,6 +132,17 @@ constructor > environment > logger.json > defaults
 | `LOG_PRETTY_PRINT`     | Pretty-print objects in console output        |
 | `LOG_CUSTOM_PATTERN`   | Pattern used for `echo.custom()` logs         |
 | `LOG_CUSTOM_COLORS`    | Comma-separated list of `TAG:color` pairs     |
+
+---
+
+### Custom File Naming
+```json
+{
+  "fileNameFormat": "yyyy-MM-dd",        // 2025-06-03.jsonl
+  "fileNameFormat": "yyyy-MM-dd_HH-mm",  // 2025-06-03_18-30.jsonl
+  "fileNameFormat": "yyyyMMdd",          // 20250603.jsonl
+}
+```
 
 ---
 

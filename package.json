@@ -46,6 +46,12 @@
 		"type": "git",
 		"url": "https://git.creations.works/atums/echo"
 	},
+	"keywords": ["logger", "logging", "typescript", "nodejs", "structured"],
+	"author": "creations.works",
+	"homepage": "https://git.creations.works/atums/echo",
+	"bugs": {
+		"url": "https://git.creations.works/atums/echo/issues"
+	},
 	"dependencies": {
 		"date-fns-tz": "^3.2.0"
 	}

@@ -8,6 +8,7 @@ import type {
 	LogLevelValue,
 	LoggerConfig,
 	PatternContext,
+	PatternTokens,
 } from "@types";
 
 function getTimestamp(config: Required<LoggerConfig>): {
@@ -113,22 +114,121 @@ function generateShortId(length = 8): string {
 	return id;
 }
 
-function replaceColorTokens(
-	input: string,
-	level: LogLevel,
+function formatData(data: unknown, config: Required<LoggerConfig>): string {
+	return config.prettyPrint && typeof data === "object" && data !== null
+		? inspect(data, {
+				depth: null,
+				colors: config.consoleColor,
+				breakLength: 1,
+				compact: false,
+			})
+		: format(data);
+}
+
+function getConsoleMethod(level: LogLevel): "log" | "warn" | "error" {
+	if (level === "error" || level === "fatal") return "error";
+	if (level === "warn") return "warn";
+	return "log";
+}
+
+function resolveColor(
+	colorKey: string,
 	config: Required<LoggerConfig>,
+	level?: LogLevel,
+	tag?: string,
 ): string {
-	return input
-		.replace(/{color:(\w+)}/g, (_, colorKey) => {
-			if (!config.consoleColor) return "";
-			if (colorKey === "levelColor") {
-				const colorForLevel =
-					config.levelColor?.[level] ?? defaultLevelColor[level];
-				return ansiColors[colorForLevel ?? ""] ?? "";
-			}
-			return ansiColors[colorKey] ?? "";
-		})
-		.replace(/{reset}/g, config.consoleColor ? ansiColors.reset : "");
+	if (!config.consoleColor) return "";
+
+	if (colorKey === "levelColor" && level) {
+		const colorForLevel =
+			config.levelColor?.[level] ?? defaultLevelColor[level];
+		return ansiColors[colorForLevel ?? ""] ?? "";
+	}
+
+	if (colorKey === "tagColor" && tag) {
+		const normalizedTag = tag.toUpperCase();
+		return ansiColors[config.customColors?.[normalizedTag] ?? "green"] ?? "";
+	}
+
+	if (colorKey === "contextColor") {
+		return ansiColors.cyan ?? "";
+	}
+
+	return ansiColors[colorKey] ?? "";
+}
+
+function serializeLogData(data: unknown): unknown {
+	if (data instanceof Error) {
+		return {
+			name: data.name,
+			message: data.message,
+			stack: data.stack,
+		};
+	}
+
+	if (typeof data === "string" || typeof data === "number") {
+		return data;
+	}
+
+	return data;
+}
+
+function processPattern(
+	pattern: string,
+	tokens: PatternTokens,
+	config: Required<LoggerConfig>,
+	level?: LogLevel,
+	tag?: string,
+): string {
+	let processed = pattern;
+
+	if (tokens.timestamp) {
+		processed = processed.replace(/{timestamp}/g, tokens.timestamp);
+	}
+	if (tokens.prettyTimestamp) {
+		processed = processed.replace(
+			/{pretty-timestamp}/g,
+			tokens.prettyTimestamp,
+		);
+	}
+	if (tokens.levelName) {
+		processed = processed.replace(/{level-name}/g, tokens.levelName);
+	}
+	if (tokens.level) {
+		processed = processed.replace(/{level}/g, tokens.level);
+	}
+	if (tokens.fileName) {
+		processed = processed.replace(/{file-name}/g, tokens.fileName);
+	}
+	if (tokens.line) {
+		processed = processed.replace(/{line}/g, tokens.line);
+	}
+	if (tokens.column) {
+		processed = processed.replace(/{column}/g, tokens.column);
+	}
+	if (tokens.data) {
+		processed = processed.replace(/{data}/g, tokens.data);
+	}
+	if (tokens.id) {
+		processed = processed.replace(/{id}/g, tokens.id);
+	}
+	if (tokens.tag) {
+		processed = processed.replace(/{tag}/g, tokens.tag);
+	}
+	if (tokens.context) {
+		processed = processed.replace(/{context}/g, tokens.context);
+	}
+
+	processed = processed.replace(/{color:(\w+)}/g, (_, colorKey) => {
+		return resolveColor(colorKey, config, level, tag);
+	});
+
+	processed = processed.replace(
+		/{reset}/g,
+		config.consoleColor ? ansiColors.reset : "",
+	);
+
+	return processed;
 }
 
 function parsePattern(ctx: PatternContext): string {
@@ -136,30 +236,33 @@ function parsePattern(ctx: PatternContext): string {
 
 	const { id, fileName, line, column, timestamp, prettyTimestamp } =
 		getCallerInfo(config);
-	const resolvedData: string =
-		config.prettyPrint && typeof data === "object" && data !== null
-			? inspect(data, {
-					depth: null,
-					colors: config.consoleColor,
-					breakLength: 1,
-					compact: false,
-				})
-			: format(data);
 
+	const resolvedData: string = formatData(data, config);
 	const numericLevel: LogLevelValue = logLevelValues[level];
 
-	const final = config.pattern
-		.replace(/{timestamp}/g, timestamp)
-		.replace(/{pretty-timestamp}/g, prettyTimestamp)
-		.replace(/{level-name}/g, level.toUpperCase())
-		.replace(/{level}/g, String(numericLevel))
-		.replace(/{file-name}/g, fileName)
-		.replace(/{line}/g, line)
-		.replace(/{data}/g, resolvedData)
-		.replace(/{id}/g, id)
-		.replace(/{column}/g, column);
+	const tokens: PatternTokens = {
+		timestamp,
+		prettyTimestamp,
+		levelName: level.toUpperCase(),
+		level: String(numericLevel),
+		fileName,
+		line,
+		column,
+		data: resolvedData,
+		id,
+	};
 
-	return replaceColorTokens(final, level, config);
+	return processPattern(config.pattern, tokens, config, level);
 }
 
-export { parsePattern, getCallerInfo, getTimestamp, generateShortId };
+export {
+	parsePattern,
+	getCallerInfo,
+	getTimestamp,
+	generateShortId,
+	formatData,
+	getConsoleMethod,
+	resolveColor,
+	serializeLogData,
+	processPattern,
+};

@@ -7,17 +7,24 @@ import {
 	statSync,
 } from "node:fs";
 import { resolve } from "node:path";
-import { format, inspect } from "node:util";
-import { getCallerInfo, getTimestamp, parsePattern } from "@lib/char";
 import {
-	ansiColors,
+	formatData,
+	getCallerInfo,
+	getConsoleMethod,
+	getTimestamp,
+	parsePattern,
+	processPattern,
+} from "@lib/char";
+import {
 	defaultConfig,
 	loadEnvConfig,
 	loadLoggerConfig,
 	logLevelValues,
+	validateAndSanitizeConfig,
 } from "@lib/config";
 import { FileLogger } from "@lib/file";
-import type { LogLevel, LoggerConfig } from "@types";
+
+import type { LogLevel, LoggerConfig, PatternTokens } from "@types";
 
 class Echo {
 	private readonly directory: string;
@@ -35,12 +42,18 @@ class Echo {
 
 		const envConfig: LoggerConfig = loadEnvConfig();
 
-		this.config = {
+		const mergedConfig = {
 			...defaultConfig,
 			...fileConfig,
 			...envConfig,
 			...overrideConfig,
 		};
+		const finalConfig = validateAndSanitizeConfig(
+			mergedConfig,
+			"merged configuration",
+		);
+
+		this.config = finalConfig as Required<LoggerConfig>;
 
 		this.directory = resolve(this.config.directory);
 
@@ -75,9 +88,7 @@ class Echo {
 		const line = parsePattern({ level, data, config: this.config });
 
 		if (this.config.console) {
-			console[level === "error" ? "error" : level === "warn" ? "warn" : "log"](
-				line,
-			);
+			console[getConsoleMethod(level)](line);
 		}
 
 		if (!this.config.disableFile && this.fileLogger) {
@@ -113,39 +124,21 @@ class Echo {
 		if (this.config.silent) return;
 
 		const timestamps = getTimestamp(this.config);
-
-		const normalizedTag = tag.toUpperCase();
-		const tagColor = this.config.consoleColor
-			? (ansiColors[this.config.customColors?.[normalizedTag] ?? "green"] ?? "")
-			: "";
-		const contextColor = this.config.consoleColor ? ansiColors.cyan : "";
-		const gray = this.config.consoleColor ? ansiColors.gray : "";
-		const reset = this.config.consoleColor ? ansiColors.reset : "";
-
-		const resolvedData =
-			this.config.prettyPrint && typeof data === "object" && data !== null
-				? inspect(data, {
-						depth: null,
-						colors: this.config.consoleColor,
-						breakLength: 1,
-						compact: false,
-					})
-				: format(data);
+		const resolvedData = formatData(data, this.config);
 
 		const pattern =
 			this.config.customPattern ??
 			"{color:gray}{pretty-timestamp}{reset} {color:tagColor}[{tag}]{reset} {color:contextColor}({context}){reset} {data}";
 
-		const line = pattern
-			.replace(/{timestamp}/g, timestamps.timestamp)
-			.replace(/{pretty-timestamp}/g, timestamps.prettyTimestamp)
-			.replace(/{tag}/g, tag)
-			.replace(/{context}/g, context)
-			.replace(/{data}/g, resolvedData)
-			.replace(/{color:gray}/g, gray)
-			.replace(/{color:tagColor}/g, tagColor)
-			.replace(/{color:contextColor}/g, contextColor)
-			.replace(/{reset}/g, reset);
+		const tokens: PatternTokens = {
+			timestamp: timestamps.timestamp,
+			prettyTimestamp: timestamps.prettyTimestamp,
+			tag,
+			context,
+			data: resolvedData,
+		};
+
+		const line = processPattern(pattern, tokens, this.config, undefined, tag);
 
 		if (this.config.console) {
 			console.log(line);
