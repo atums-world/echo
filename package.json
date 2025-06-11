@@ -1,6 +1,6 @@
 {
 	"name": "@atums/echo",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"description": "A minimal, flexible logger",
 	"private": false,
 	"type": "module",
@@ -9,8 +9,12 @@
 	"types": "./dist/index.d.ts",
 	"typesVersions": {
 		"*": {
-			"lib/char": ["./dist/lib/char.d.ts"],
-			"lib/config": ["./dist/lib/config.d.ts"]
+			"lib/char": [
+				"./dist/lib/char.d.ts"
+			],
+			"lib/config": [
+				"./dist/lib/config.d.ts"
+			]
 		}
 	},
 	"exports": {
@@ -41,12 +45,22 @@
 		"tsup": "^8.5.0",
 		"typescript": "^5.8.3"
 	},
-	"files": ["dist", "README.md", "LICENSE"],
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE"
+	],
 	"repository": {
 		"type": "git",
 		"url": "https://git.creations.works/atums/echo"
 	},
-	"keywords": ["logger", "logging", "typescript", "nodejs", "structured"],
+	"keywords": [
+		"logger",
+		"logging",
+		"typescript",
+		"nodejs",
+		"structured"
+	],
 	"author": "creations.works",
 	"homepage": "https://git.creations.works/atums/echo",
 	"bugs": {
