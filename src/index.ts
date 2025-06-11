@@ -77,7 +77,7 @@ class Echo {
 		accessSync(dir, constants.W_OK);
 	}
 
-	private log(level: LogLevel, data: unknown): void {
+	private log(level: LogLevel, ...args: unknown[]): void {
 		if (
 			this.config.silent ||
 			logLevelValues[this.config.level] > logLevelValues[level]
@@ -85,39 +85,38 @@ class Echo {
 			return;
 
 		const meta = getCallerInfo(this.config);
-		const line = parsePattern({ level, data, config: this.config });
+		const line = parsePattern({ level, data: args, config: this.config });
 
 		if (this.config.console) {
 			console[getConsoleMethod(level)](line);
 		}
-
 		if (!this.config.disableFile && this.fileLogger) {
-			this.fileLogger.write(level, data, meta);
+			this.fileLogger.write(level, args, meta);
 		}
 	}
 
-	public debug(data: unknown): void {
-		this.log("debug", data);
+	public debug(...args: unknown[]): void {
+		this.log("debug", ...args);
 	}
 
-	public info(data: unknown): void {
-		this.log("info", data);
+	public info(...args: unknown[]): void {
+		this.log("info", ...args);
 	}
 
-	public warn(data: unknown): void {
-		this.log("warn", data);
+	public warn(...args: unknown[]): void {
+		this.log("warn", ...args);
 	}
 
-	public error(data: unknown): void {
-		this.log("error", data);
+	public error(...args: unknown[]): void {
+		this.log("error", ...args);
 	}
 
-	public fatal(data: unknown): void {
-		this.log("fatal", data);
+	public fatal(...args: unknown[]): void {
+		this.log("fatal", ...args);
 	}
 
-	public trace(data: unknown): void {
-		this.log("trace", data);
+	public trace(...args: unknown[]): void {
+		this.log("trace", ...args);
 	}
 
 	public custom(tag: string, context: string, data: unknown): void {

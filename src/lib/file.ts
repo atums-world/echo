@@ -8,8 +8,9 @@ import {
 } from "node:fs";
 import { join } from "node:path";
 import { serializeLogData } from "@lib/char";
-import type { LogLevel, LoggerConfig } from "@types";
 import { format } from "date-fns-tz";
+
+import type { LogLevel, LoggerConfig } from "@types";
 
 class FileLogger {
 	private stream: WriteStream | null = null;
