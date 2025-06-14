@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import type { LogLevel, LoggerConfig } from "@types";
+import type { LogLevel, LoggerConfig } from "#types";
 
 const logLevelValues = {
 	trace: 10,
@@ -51,6 +51,7 @@ const defaultConfig: Required<LoggerConfig> = {
 	rotate: true,
 	maxFiles: null,
 	fileNameFormat: "yyyy-MM-dd",
+	subDirectory: null,
 
 	console: true,
 	consoleColor: true,
@@ -231,6 +232,10 @@ function loadEnvConfig(): LoggerConfig {
 
 	if (process.env.LOG_FILE_NAME_FORMAT) {
 		config.fileNameFormat = process.env.LOG_FILE_NAME_FORMAT;
+	}
+
+	if (process.env.LOG_SUB_DIRECTORY) {
+		config.subDirectory = process.env.LOG_SUB_DIRECTORY;
 	}
 
 	if (process.env.LOG_DATE_FORMAT) {

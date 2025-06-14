@@ -14,17 +14,17 @@ import {
 	getTimestamp,
 	parsePattern,
 	processPattern,
-} from "@lib/char";
+} from "#lib/char";
 import {
 	defaultConfig,
 	loadEnvConfig,
 	loadLoggerConfig,
 	logLevelValues,
 	validateAndSanitizeConfig,
-} from "@lib/config";
-import { FileLogger } from "@lib/file";
+} from "#lib/config";
+import { FileLogger } from "#lib/file";
 
-import type { LogLevel, LoggerConfig, PatternTokens } from "@types";
+import type { LogLevel, LoggerConfig, PatternTokens } from "#types";
 
 class Echo {
 	private readonly directory: string;
@@ -160,4 +160,3 @@ function createLogger(config?: string | LoggerConfig): Echo {
 
 const echo = new Echo();
 export { echo, Echo, createLogger };
-export type { LoggerConfig, LogLevel } from "@types";

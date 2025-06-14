@@ -1,4 +1,4 @@
-import type { ansiColors, logLevelValues } from "@lib/config";
+import type { ansiColors, logLevelValues } from "#lib/config";
 
 type LogLevelValue = (typeof logLevelValues)[keyof typeof logLevelValues];
 type LogLevel = keyof typeof logLevelValues;
@@ -11,6 +11,7 @@ type LoggerConfig = {
 	rotate?: boolean;
 	maxFiles?: number | null;
 	fileNameFormat?: string;
+	subDirectory?: string | null;
 
 	console?: boolean;
 	consoleColor?: boolean;

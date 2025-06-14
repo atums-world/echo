@@ -3,11 +3,10 @@
 		"baseUrl": "./",
 		"paths": {
 			"@/*": ["src/*"],
-			"@types": ["types/index.ts"],
-			"@types/*": ["types/*"],
-			"@lib/*": ["src/lib/*"]
+			"#types": ["types/index.ts"],
+			"#lib/*": ["src/lib/*"]
 		},
-		"typeRoots": ["./types", "./node_modules/@types"],
+		"typeRoots": ["./node_modules/@types"],
 		"lib": ["ESNext", "DOM"],
 		"target": "ESNext",
 		"module": "ESNext",

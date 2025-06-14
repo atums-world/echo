@@ -7,7 +7,7 @@
 	},
 	"files": {
 		"ignoreUnknown": true,
-		"ignore": ["dist"]
+		"ignore": ["dist", "tsconfig.json"]
 	},
 	"formatter": {
 		"enabled": true,
@@ -36,7 +36,7 @@
 				"noVar": "error"
 			}
 		},
-		"ignore": ["types"]
+		"ignore": ["types", "tsconfig.json"]
 	},
 	"javascript": {
 		"formatter": {

@@ -1,27 +1,29 @@
 import {
 	type WriteStream,
 	createWriteStream,
-	existsSync,
 	mkdirSync,
 	readdirSync,
 	unlinkSync,
 } from "node:fs";
 import { join } from "node:path";
-import { serializeLogData } from "@lib/char";
 import { format } from "date-fns-tz";
+import { serializeLogData } from "#lib/char";
 
-import type { LogLevel, LoggerConfig } from "@types";
+import type { LogLevel, LoggerConfig } from "#types";
 
 class FileLogger {
 	private stream: WriteStream | null = null;
 	private filePath = "";
 	private date = "";
 	private fileNameFormat = "yyyy-MM-dd";
+	private logDirectory: string;
 
 	constructor(private readonly config: Required<LoggerConfig>) {
-		if (!existsSync(this.config.directory)) {
-			mkdirSync(this.config.directory, { recursive: true });
-		}
+		this.logDirectory = this.config.subDirectory
+			? join(this.config.directory, this.config.subDirectory)
+			: this.config.directory;
+
+		mkdirSync(this.logDirectory, { recursive: true });
 
 		if (this.config.fileNameFormat) {
 			try {
@@ -39,7 +41,7 @@ class FileLogger {
 
 	private getLogFilePath(dateStr: string): string {
 		const fileName = `${dateStr}.jsonl`;
-		return join(this.config.directory, fileName);
+		return join(this.logDirectory, fileName);
 	}
 
 	private resetStream(path: string): void {
@@ -72,7 +74,7 @@ class FileLogger {
 		}
 
 		const fileRegex = this.generateFileRegex();
-		const files = readdirSync(this.config.directory)
+		const files = readdirSync(this.logDirectory)
 			.filter((file) => fileRegex.test(file))
 			.sort();
 
@@ -83,7 +85,7 @@ class FileLogger {
 
 		for (const file of excess) {
 			try {
-				unlinkSync(join(this.config.directory, file));
+				unlinkSync(join(this.logDirectory, file));
 			} catch {}
 		}
 	}
@@ -92,7 +94,7 @@ class FileLogger {
 		if (this.config.rotate && dateStr) {
 			return this.getLogFilePath(dateStr);
 		}
-		return join(this.config.directory, "log.jsonl");
+		return join(this.logDirectory, "log.jsonl");
 	}
 
 	public write(

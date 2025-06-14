@@ -1,7 +1,7 @@
 import { basename } from "node:path";
 import { format, inspect } from "node:util";
-import { ansiColors, defaultLevelColor, logLevelValues } from "@lib/config";
 import { format as formatDate } from "date-fns-tz";
+import { ansiColors, defaultLevelColor, logLevelValues } from "#lib/config";
 
 import type {
 	LogLevel,
@@ -9,7 +9,7 @@ import type {
 	LoggerConfig,
 	PatternContext,
 	PatternTokens,
-} from "@types";
+} from "#types";
 
 function getTimestamp(config: Required<LoggerConfig>): {
 	prettyTimestamp: string;

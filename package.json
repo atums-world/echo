@@ -4,32 +4,24 @@
 	"description": "A minimal, flexible logger",
 	"private": false,
 	"type": "module",
-	"main": "./dist/index.js",
-	"module": "./dist/index.mjs",
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
 	"types": "./dist/index.d.ts",
-	"typesVersions": {
-		"*": {
-			"lib/char": ["./dist/lib/char.d.ts"],
-			"lib/config": ["./dist/lib/config.d.ts"]
-		}
-	},
 	"exports": {
 		".": {
-			"import": "./dist/index.js",
-			"require": "./dist/index.js"
-		},
-		"./lib/char": {
-			"import": "./dist/lib/char.js",
-			"require": "./dist/lib/char.js"
-		},
-		"./lib/config": {
-			"import": "./dist/lib/config.js",
-			"require": "./dist/lib/config.js"
+			"import": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.js"
+			},
+			"require": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.cjs"
+			}
 		}
 	},
 	"scripts": {
 		"dev": "bun run build --watch",
-		"build": "rm -rf dist && tsup src/index.ts --dts --out-dir dist --format esm,cjs",
+		"build": "rm -rf dist && tsup && rm -f dist/*.d.cts dist/**/*.d.cts",
 		"lint": "bunx biome check",
 		"lint:fix": "bunx biome check --fix",
 		"cleanup": "rm -rf logs node_modules bun.lock"
@@ -38,8 +30,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
 		"@types/bun": "^1.2.15",
-		"tsup": "^8.5.0",
-		"typescript": "^5.8.3"
+		"tsup": "latest"
 	},
 	"files": ["dist", "README.md", "LICENSE"],
 	"repository": {
@@ -53,6 +44,6 @@
 		"url": "https://git.creations.works/atums/echo/issues"
 	},
 	"dependencies": {
-		"date-fns-tz": "^3.2.0"
+		"date-fns-tz": "latest"
 	}
 }
