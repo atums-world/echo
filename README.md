@@ -125,6 +125,7 @@ constructor > environment > logger.json > defaults
 	"rotate": true,
 	"maxFiles": 3,
 	"fileNameFormat": "yyyy-MM-dd",
+	"subDirectory": null,
 
 	"console": true,
 	"consoleColor": true,
@@ -172,6 +173,7 @@ constructor > environment > logger.json > defaults
 | `LOG_ROTATE`           | Enable daily rotation                         |
 | `LOG_MAX_FILES`        | Max rotated files to keep                     |
 | `LOG_FILE_NAME_FORMAT` | Custom file name format (default: yyyy-MM-dd) |
+| `LOG_SUBDIRECTORY`     | Subdirectory for log files (default: null)    |
 | `LOG_CONSOLE`          | Enable console output                         |
 | `LOG_CONSOLE_COLOR`    | Enable ANSI color in console output           |
 | `LOG_DATE_FORMAT`      | Date format for display timestamp             |
