@@ -32,22 +32,12 @@
 		"@types/bun": "^1.2.15",
 		"tsup": "latest"
 	},
-	"files": [
-		"dist",
-		"README.md",
-		"LICENSE"
-	],
+	"files": ["dist", "README.md", "LICENSE"],
 	"repository": {
 		"type": "git",
 		"url": "https://git.creations.works/atums/echo"
 	},
-	"keywords": [
-		"logger",
-		"logging",
-		"typescript",
-		"nodejs",
-		"structured"
-	],
+	"keywords": ["logger", "logging", "typescript", "nodejs", "structured"],
 	"author": "creations.works",
 	"homepage": "https://git.creations.works/atums/echo",
 	"bugs": {
